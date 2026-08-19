@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 readonly ROOT_DIR
 readonly CLUSTER_NAME="${IOT_CLUSTER_NAME:-iot}"
 readonly LOGIN="${IOT_LOGIN:-yanli}"
-readonly REPO_URL="${IOT_GIT_REPO:-}"
+readonly REPO_URL="https://github.com/Tizi42/inception-of-things-yanli"
 readonly REVISION="${IOT_GIT_REVISION:-main}"
 readonly APP_TEMPLATE="${ROOT_DIR}/p3/confs/argocd-application.yaml.tmpl"
 
@@ -22,8 +22,7 @@ if ! docker info >/dev/null 2>&1; then
 fi
 
 if [[ ! "${REPO_URL}" =~ ^https://github\.com/[^/]+/[^/]+(\.git)?$ ]]; then
-  echo "Set IOT_GIT_REPO to the public GitHub repository containing this project." >&2
-  echo "Example: IOT_GIT_REPO=https://github.com/<user>/inception-of-things-${LOGIN}.git $0" >&2
+  echo "The configured public GitHub repository is invalid: ${REPO_URL}" >&2
   exit 1
 fi
 
@@ -50,7 +49,8 @@ kubectl config use-context "k3d-${CLUSTER_NAME}" >/dev/null
 kubectl wait --for=condition=Ready node --all --timeout=180s
 
 kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl apply -n argocd --server-side --force-conflicts \
+  -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 kubectl -n argocd wait --for=condition=Available deployment --all --timeout=300s
 kubectl -n argocd wait --for=condition=Ready pod --all --timeout=300s
 kubectl create namespace dev --dry-run=client -o yaml | kubectl apply -f -

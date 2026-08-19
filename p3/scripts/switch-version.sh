@@ -5,6 +5,8 @@ readonly VERSION="${1:?usage: switch-version.sh v1|v2}"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 readonly ROOT_DIR
 readonly DEPLOYMENT="${ROOT_DIR}/p3/confs/app/deployment.yaml"
+readonly PUSH_REPO="git@github.com:Tizi42/inception-of-things-yanli.git"
+readonly PUSH_BRANCH="${IOT_GIT_REVISION:-main}"
 
 if [[ ! "${VERSION}" =~ ^v[12]$ ]]; then
   echo "Version must be v1 or v2." >&2
@@ -22,8 +24,9 @@ if git -C "${ROOT_DIR}" diff --cached --quiet; then
   echo "The Git repository already declares ${VERSION}."
 else
   git -C "${ROOT_DIR}" commit -m "deploy playground ${VERSION}"
-  git -C "${ROOT_DIR}" push origin HEAD
 fi
+
+git -C "${ROOT_DIR}" push "${PUSH_REPO}" "HEAD:${PUSH_BRANCH}"
 
 if kubectl -n argocd get application iot-app >/dev/null 2>&1; then
   kubectl -n argocd annotate application iot-app argocd.argoproj.io/refresh=hard --overwrite >/dev/null
