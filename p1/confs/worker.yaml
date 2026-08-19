@@ -1,0 +1,5 @@
+server: https://__SERVER_IP__:6443
+token: __CLUSTER_TOKEN__
+node-ip: __NODE_IP__
+flannel-iface: __PRIVATE_IFACE__
+

@@ -1,0 +1,14 @@
+*.docx
+.vagrant/
+*.log
+.DS_Store
+Thumbs.db
+
+# Locally rendered or generated material
+tmp/
+output/
+
+# Runtime-only secrets and generated manifests
+.state/
+*.generated.yaml
+

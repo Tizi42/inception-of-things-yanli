@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -Eeux -o pipefail
+
+readonly NODE_IP="${1:?server IP is required}"
+readonly CLUSTER_TOKEN="${2:?cluster token is required}"
+readonly CONFIG_SOURCE="/vagrant/confs/server.yaml"
+readonly CONFIG_TARGET="/etc/rancher/k3s/config.yaml"
+
+export DEBIAN_FRONTEND=noninteractive
+apt-get update -qq
+apt-get install -y -qq ca-certificates curl
+
+private_iface="$(ip -o -4 addr show | awk -v ip="${NODE_IP}" '$4 ~ ("^" ip "/") {print $2; exit}')"
+if [[ -z "${private_iface}" ]]; then
+  echo "Cannot find the interface carrying ${NODE_IP}" >&2
+  exit 1
+fi
+
+install -d -m 0755 /etc/rancher/k3s
+sed \
+  -e "s|__NODE_IP__|${NODE_IP}|g" \
+  -e "s|__PRIVATE_IFACE__|${private_iface}|g" \
+  "${CONFIG_SOURCE}" > "${CONFIG_TARGET}"
+chmod 0600 "${CONFIG_TARGET}"
+
+curl -sfL https://get.k3s.io | \
+  INSTALL_K3S_CHANNEL=stable \
+  INSTALL_K3S_EXEC=server \
+  K3S_TOKEN="${CLUSTER_TOKEN}" \
+  sh -
+
+systemctl enable --now k3s
+timeout 180 bash -c 'until kubectl get --raw=/readyz >/dev/null 2>&1; do sleep 3; done'
+
+install -d -m 0700 -o vagrant -g vagrant /home/vagrant/.kube
+cp /etc/rancher/k3s/k3s.yaml /home/vagrant/.kube/config
+chown vagrant:vagrant /home/vagrant/.kube/config
+chmod 0600 /home/vagrant/.kube/config
+
+echo "K3s server is ready on ${NODE_IP} (${private_iface})."
+

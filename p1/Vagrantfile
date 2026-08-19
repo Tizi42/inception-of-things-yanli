@@ -1,0 +1,58 @@
+# frozen_string_literal: true
+
+require "fileutils"
+require "securerandom"
+
+LOGIN = ENV.fetch("IOT_LOGIN", "yanli")
+BOX = ENV.fetch("IOT_BOX", "cloud-image/ubuntu-26.04")
+SERVER_IP = "192.168.56.110"
+WORKER_IP = "192.168.56.111"
+
+token_path = File.join(__dir__, ".vagrant", "k3s-token")
+FileUtils.mkdir_p(File.dirname(token_path))
+unless File.exist?(token_path)
+  File.write(token_path, SecureRandom.hex(32))
+  File.chmod(0o600, token_path)
+end
+cluster_token = File.read(token_path).strip
+
+Vagrant.configure("2") do |config|
+  config.vm.box = BOX
+  config.vm.boot_timeout = 600
+  config.ssh.insert_key = true
+  config.vm.synced_folder ".", "/vagrant", type: "virtualbox"
+
+  config.vm.define "#{LOGIN}S" do |server|
+    server.vm.hostname = "#{LOGIN}S"
+    server.vm.network "private_network", ip: SERVER_IP
+
+    server.vm.provider "virtualbox" do |vb|
+      vb.name = "#{LOGIN}S"
+      vb.gui = false
+      vb.linked_clone = true
+      vb.cpus = Integer(ENV.fetch("IOT_SERVER_CPUS", "2"))
+      vb.memory = Integer(ENV.fetch("IOT_SERVER_MEMORY", "2048"))
+    end
+
+    server.vm.provision "shell",
+                        path: "scripts/server.sh",
+                        args: [SERVER_IP, cluster_token]
+  end
+
+  config.vm.define "#{LOGIN}SW" do |worker|
+    worker.vm.hostname = "#{LOGIN}SW"
+    worker.vm.network "private_network", ip: WORKER_IP
+
+    worker.vm.provider "virtualbox" do |vb|
+      vb.name = "#{LOGIN}SW"
+      vb.gui = false
+      vb.linked_clone = true
+      vb.cpus = Integer(ENV.fetch("IOT_WORKER_CPUS", "1"))
+      vb.memory = Integer(ENV.fetch("IOT_WORKER_MEMORY", "1024"))
+    end
+
+    worker.vm.provision "shell",
+                        path: "scripts/worker.sh",
+                        args: [WORKER_IP, SERVER_IP, cluster_token]
+  end
+end

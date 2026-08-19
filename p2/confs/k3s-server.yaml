@@ -1,0 +1,7 @@
+write-kubeconfig-mode: "0644"
+node-ip: __NODE_IP__
+advertise-address: __NODE_IP__
+flannel-iface: __PRIVATE_IFACE__
+tls-san:
+  - __NODE_IP__
+

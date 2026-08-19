@@ -1,0 +1,27 @@
+# frozen_string_literal: true
+
+LOGIN = ENV.fetch("IOT_LOGIN", "yanli")
+BOX = ENV.fetch("IOT_BOX", "cloud-image/ubuntu-26.04")
+SERVER_IP = "192.168.56.110"
+
+Vagrant.configure("2") do |config|
+  config.vm.box = BOX
+  config.vm.boot_timeout = 600
+  config.ssh.insert_key = true
+  config.vm.synced_folder ".", "/vagrant", type: "virtualbox"
+
+  config.vm.define "#{LOGIN}S" do |server|
+    server.vm.hostname = "#{LOGIN}S"
+    server.vm.network "private_network", ip: SERVER_IP
+
+    server.vm.provider "virtualbox" do |vb|
+      vb.name = "#{LOGIN}S-p2"
+      vb.gui = false
+      vb.linked_clone = true
+      vb.cpus = Integer(ENV.fetch("IOT_SERVER_CPUS", "2"))
+      vb.memory = Integer(ENV.fetch("IOT_SERVER_MEMORY", "2048"))
+    end
+
+    server.vm.provision "shell", path: "scripts/server.sh", args: [SERVER_IP]
+  end
+end
