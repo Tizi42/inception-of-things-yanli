@@ -1,0 +1,32 @@
+# frozen_string_literal: true
+
+LOGIN = ENV.fetch("IOT_LOGIN", "yanli")
+BOX = ENV.fetch("IOT_BOX", "cloud-image/ubuntu-26.04")
+BONUS_IP = ENV.fetch("IOT_BONUS_IP", "192.168.56.120")
+
+Vagrant.configure("2") do |config|
+  config.vm.box = BOX
+  config.vm.boot_timeout = 900
+  config.ssh.insert_key = true
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+  config.vm.synced_folder "..", "/workspace", type: "virtualbox"
+
+  config.vm.define "#{LOGIN}B" do |machine|
+    machine.vm.hostname = "#{LOGIN}B"
+    machine.vm.network "private_network", ip: BONUS_IP
+    machine.vm.disk :disk,
+      size: ENV.fetch("IOT_BONUS_DISK_SIZE", "50GB"),
+      primary: true
+
+    machine.vm.provider "virtualbox" do |vb|
+      vb.name = "#{LOGIN}B-bonus"
+      vb.gui = false
+      vb.linked_clone = true
+      vb.cpus = Integer(ENV.fetch("IOT_BONUS_CPUS", "6"))
+      vb.memory = Integer(ENV.fetch("IOT_BONUS_MEMORY", "8192"))
+      vb.customize ["modifyvm", :id, "--ioapic", "on"]
+    end
+
+    machine.vm.provision "shell", path: "scripts/provision.sh"
+  end
+end

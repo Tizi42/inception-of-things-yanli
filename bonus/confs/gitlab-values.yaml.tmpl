@@ -1,0 +1,54 @@
+#	Based on GitLab's official minimum local-cluster example.
+#	Single-node installation.
+global:
+  edition: ce
+  hosts:
+    domain: __DOMAIN__
+    externalIP: __EXTERNAL_IP__
+    https: false
+  ingress:
+    class: traefik
+    configureCertmanager: false
+    tls:
+      enabled: false
+  rails:
+    bootsnap:
+      enabled: false
+  kas:
+    enabled: false
+  registry:
+    enabled: false
+  shell:
+    port: 2222
+
+installCertmanager: false
+
+nginx-ingress:
+  enabled: false
+
+prometheus:
+  install: false
+
+gitlab-runner:
+  install: false
+
+gitlab:
+  webservice:
+    minReplicas: 1
+    maxReplicas: 1
+  sidekiq:
+    minReplicas: 1
+    maxReplicas: 1
+    concurrency: 10
+  gitlab-shell:
+    minReplicas: 1
+    maxReplicas: 1
+    service:
+      type: NodePort
+      nodePort: 32022
+
+registry:
+  enabled: false
+  hpa:
+    minReplicas: 1
+    maxReplicas: 1
