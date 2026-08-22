@@ -13,7 +13,18 @@ for required_command in awk chmod chown cp curl install ip sed sh systemctl time
   fi
 done
 
-private_iface="$(ip -o -4 addr show | awk -v ip="${NODE_IP}" '$4 ~ ("^" ip "/") {print $2; exit}')"
+private_iface="$(
+  ip -o -4 addr show |
+    awk -v ip="${NODE_IP}" '
+      {
+        split($4, address, "/")
+        if (address[1] == ip && !found) {
+          print $2
+          found = 1
+        }
+      }
+    '
+)"
 if [[ -z "${private_iface}" ]]; then
   echo "Cannot find the interface carrying ${NODE_IP}" >&2
   exit 1

@@ -19,6 +19,21 @@ Complete K3s, k3d, Argo CD, and local GitLab implementation for subject version 
 
 - Docker → K3d creates K3s cluster → Argo CD watches Git → Kubernetes deployment gets updated.
 
+## Preparation
+
+**Redirect the download folder to somewhere else, like usb or goinfre**
+
+```bash
+export IOT_STORAGE="/path/to/large-disk/$USER/iot"
+mkdir -p "$IOT_STORAGE/vagrant-home" \
+         "$IOT_STORAGE/tmp" \
+         "$IOT_STORAGE/virtualbox-vms"
+
+export VAGRANT_HOME="$IOT_STORAGE/vagrant-home"
+export TMPDIR="$IOT_STORAGE/tmp"
+VBoxManage setproperty machinefolder "$IOT_STORAGE/virtualbox-vms"
+```
+
 ## Part 1 - K3s server and worker
 
 ```bash
@@ -244,7 +259,7 @@ kubectl -n iot-apps describe ingress iot-apps
 kubectl -n iot-apps get ingress iot-apps -o yaml
 ```
 
-Traefik reads the HTTP `Host` header. `app1.com` selects app1, `app2.com` selects app2, and every unmatched hostname falls through to app3 through `spec.defaultBackend`.
+K3s provides Traefik as the Ingress controller. My iot-apps Ingress routes requests by the HTTP Host header: app1.com goes to the app1 Service, app2.com goes to the app2 Service with three replicas, and unmatched hosts use app3 as the default backend. kubectl get all does not include Ingress, so I display it separately.
 
 **Host or guest:** verify all three routes.
 
@@ -253,8 +268,6 @@ curl -fsS -H 'Host: app1.com' http://192.168.56.110/
 curl -fsS -H 'Host: app2.com' http://192.168.56.110/
 curl -fsS -H 'Host: anything.invalid' http://192.168.56.110/
 ```
-
-The responses must contain `Hello from app1`, `Hello from app2`, and `Hello from app3`, respectively. The complete automated proof is:
 
 ```bash
 vagrant ssh yanliS -c 'bash /vagrant/scripts/check.sh'
