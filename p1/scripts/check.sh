@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -Exeu -o pipefail
 
+for required_command in awk kubectl tr wc; do
+  if ! command -v "${required_command}" >/dev/null 2>&1; then
+    echo "ERROR: required tool '${required_command}' was not found in PATH." >&2
+    echo "Install it locally and rerun this script." >&2
+    exit 127
+  fi
+done
+
 expected_nodes=2
 actual_nodes="$(kubectl get nodes --no-headers | wc -l | tr -d ' ')"
 ready_nodes="$(kubectl get nodes --no-headers | awk '$2 == "Ready" {count++} END {print count+0}')"

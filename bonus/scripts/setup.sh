@@ -8,18 +8,11 @@ readonly EXTERNAL_IP="${IOT_BONUS_IP:-192.168.56.120}"
 readonly DOMAIN="${IOT_GITLAB_DOMAIN:-${EXTERNAL_IP}.nip.io}"
 readonly GITLAB_CHART_VERSION="${IOT_GITLAB_CHART_VERSION:-9.11.12}"
 readonly VALUES_TEMPLATE="${ROOT_DIR}/bonus/confs/gitlab-values.yaml.tmpl"
+# shellcheck source=../../scripts/lib/requirements.sh
+source "${ROOT_DIR}/scripts/lib/requirements.sh"
 
-for command in docker helm jq k3d kubectl; do
-  command -v "${command}" >/dev/null || {
-    echo "Missing ${command}; use the bonus Vagrantfile or run p3/scripts/install-tools.sh." >&2
-    exit 1
-  }
-done
-
-if ! docker info >/dev/null 2>&1; then
-  echo "Docker is unavailable to this user. Reload the VM after provisioning." >&2
-  exit 1
-fi
+require_commands awk base64 curl docker git grep helm jq k3d kubectl openssl sed timeout
+require_docker_access
 
 if ! k3d cluster list --no-headers 2>/dev/null | awk '{print $1}' | grep -Fxq "${CLUSTER_NAME}"; then
   k3d cluster create "${CLUSTER_NAME}" \

@@ -11,10 +11,10 @@ readonly PROJECT_NAME="inception-of-things-${LOGIN}"
 readonly PROJECT_PATH="root%2F${PROJECT_NAME}"
 readonly STATE_DIR="${ROOT_DIR}/bonus/.state"
 readonly STATE_FILE="${STATE_DIR}/runtime.env"
+# shellcheck source=../../scripts/lib/requirements.sh
+source "${ROOT_DIR}/scripts/lib/requirements.sh"
 
-for command in curl git jq kubectl openssl; do
-  command -v "${command}" >/dev/null || { echo "Missing ${command}." >&2; exit 1; }
-done
+require_commands base64 curl git jq kubectl openssl sed timeout
 
 echo "Waiting for the local GitLab API (this can take 20-30 minutes on first boot)..."
 timeout 1800 bash -c "until curl -fsS '${GITLAB_URL}/-/readiness' >/dev/null; do sleep 15; done"

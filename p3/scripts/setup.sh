@@ -8,18 +8,11 @@ readonly LOGIN="${IOT_LOGIN:-yanli}"
 readonly REPO_URL="https://github.com/Tizi42/inception-of-things-yanli"
 readonly REVISION="${IOT_GIT_REVISION:-main}"
 readonly APP_TEMPLATE="${ROOT_DIR}/p3/confs/argocd-application.yaml.tmpl"
+# shellcheck source=../../scripts/lib/requirements.sh
+source "${ROOT_DIR}/scripts/lib/requirements.sh"
 
-for command in docker git k3d kubectl; do
-  command -v "${command}" >/dev/null || {
-    echo "Missing ${command}; run sudo p3/scripts/install-tools.sh first." >&2
-    exit 1
-  }
-done
-
-if ! docker info >/dev/null 2>&1; then
-  echo "Docker is unavailable to this user. Log out and back in after running install-tools.sh." >&2
-  exit 1
-fi
+require_commands awk curl docker git grep k3d kubectl sed timeout
+require_docker_access
 
 if [[ ! "${REPO_URL}" =~ ^https://github\.com/[^/]+/[^/]+(\.git)?$ ]]; then
   echo "The configured public GitHub repository is invalid: ${REPO_URL}" >&2

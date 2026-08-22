@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -Eeux -o pipefail
 
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+readonly ROOT_DIR
+# shellcheck source=../../scripts/lib/requirements.sh
+source "${ROOT_DIR}/scripts/lib/requirements.sh"
+require_commands curl grep kubectl
+
 kubectl get namespaces argocd dev
 kubectl -n argocd get application iot-app
 kubectl -n dev get deployments,pods,services -o wide
@@ -17,4 +23,3 @@ grep -q '"status":"ok"' <<<"${response}"
 
 printf 'Part 3 verified: Argo CD is %s/%s and serves %s with response %s\n' \
   "${sync_status}" "${health_status}" "${image}" "${response}"
-

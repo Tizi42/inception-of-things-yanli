@@ -7,6 +7,10 @@ readonly ROOT_DIR
 readonly DEPLOYMENT="${ROOT_DIR}/p3/confs/app/deployment.yaml"
 readonly PUSH_REPO="git@github.com:Tizi42/inception-of-things-yanli.git"
 readonly PUSH_BRANCH="${IOT_GIT_REVISION:-main}"
+# shellcheck source=../../scripts/lib/requirements.sh
+source "${ROOT_DIR}/scripts/lib/requirements.sh"
+
+require_commands curl git kubectl sed timeout
 
 if [[ ! "${VERSION}" =~ ^v[12]$ ]]; then
   echo "Version must be v1 or v2." >&2

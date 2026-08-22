@@ -1,18 +1,13 @@
 #!/usr/bin/env bash
-set -Eeux -o pipefail
+set -Eeuo pipefail
 
-IOT_TARGET_USER=vagrant bash /workspace/p3/scripts/install-tools.sh
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+readonly ROOT_DIR
+# shellcheck source=../../scripts/lib/requirements.sh
+source "${ROOT_DIR}/scripts/lib/requirements.sh"
 
-if [[ ! -f /swapfile ]]; then
-  fallocate -l 4G /swapfile
-  chmod 0600 /swapfile
-  mkswap /swapfile
-fi
-if ! swapon --show=NAME --noheadings | grep -Fxq /swapfile; then
-  swapon /swapfile
-fi
-grep -Fqx '/swapfile none swap sw 0 0' /etc/fstab || \
-  printf '%s\n' '/swapfile none swap sw 0 0' >> /etc/fstab
+require_commands awk base64 curl docker git grep helm jq k3d kubectl openssl sed timeout
+require_docker_access
 
-echo "Bonus VM tools are installed. Run 'vagrant reload', then execute:"
-echo "  vagrant ssh -c 'cd /workspace && bash bonus/scripts/setup.sh'"
+echo "Bonus prerequisites are available. No tools or system resources were installed."
+echo "Run: cd ${ROOT_DIR} && bash bonus/scripts/setup.sh"

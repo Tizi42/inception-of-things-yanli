@@ -3,6 +3,14 @@ set -Eeux -o pipefail
 
 readonly SERVER_IP="${1:-192.168.56.110}"
 
+for required_command in curl grep kubectl; do
+  if ! command -v "${required_command}" >/dev/null 2>&1; then
+    echo "ERROR: required tool '${required_command}' was not found in PATH." >&2
+    echo "Install it locally and rerun this script." >&2
+    exit 127
+  fi
+done
+
 kubectl -n iot-apps get deployments,pods,services,ingress -o wide
 
 app2_ready="$(kubectl -n iot-apps get deployment app2 -o jsonpath='{.status.readyReplicas}')"

@@ -4,6 +4,9 @@ set -Eeuo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 readonly ROOT_DIR
 readonly STATE_FILE="${ROOT_DIR}/bonus/.state/runtime.env"
+# shellcheck source=../../scripts/lib/requirements.sh
+source "${ROOT_DIR}/scripts/lib/requirements.sh"
+require_commands curl grep kubectl
 
 if [[ ! -f "${STATE_FILE}" ]]; then
   echo "Bonus setup is incomplete: ${STATE_FILE} has not been generated." >&2

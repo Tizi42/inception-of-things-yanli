@@ -6,9 +6,13 @@ readonly CLUSTER_TOKEN="${2:?cluster token is required}"
 readonly CONFIG_SOURCE="/vagrant/confs/server.yaml"
 readonly CONFIG_TARGET="/etc/rancher/k3s/config.yaml"
 
-export DEBIAN_FRONTEND=noninteractive
-apt-get update -qq
-apt-get install -y -qq ca-certificates curl
+for required_command in awk chmod chown cp curl install ip sed sh systemctl timeout; do
+  if ! command -v "${required_command}" >/dev/null 2>&1; then
+    echo "ERROR: required tool '${required_command}' was not found in PATH." >&2
+    echo "Install it in the guest before provisioning and rerun Vagrant." >&2
+    exit 127
+  fi
+done
 
 private_iface="$(ip -o -4 addr show | awk -v ip="${NODE_IP}" '$4 ~ ("^" ip "/") {print $2; exit}')"
 if [[ -z "${private_iface}" ]]; then
@@ -38,4 +42,3 @@ chown vagrant:vagrant /home/vagrant/.kube/config
 chmod 0600 /home/vagrant/.kube/config
 
 echo "K3s server is ready on ${NODE_IP} (${private_iface})."
-

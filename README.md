@@ -55,11 +55,13 @@ The first two requests select app1 and app2. Every unmatched host selects app3 t
 
 ## Part 3 - k3d and GitHub-backed Argo CD
 
-Publish this repository publicly on GitHub before setup. The repository name must include the team login, for example `inception-of-things-yanli`. The current scripts use `https://github.com/Tizi42/inception-of-things-yanli`, branch `main`, and an SSH push remote. Run these commands inside the Linux VM, not on the evaluator's host OS:
+Publish this repository publicly on GitHub before setup. The repository name must include the team login, for example `inception-of-things-yanli`. The current scripts use `https://github.com/Tizi42/inception-of-things-yanli`, branch `main`, and an SSH push remote.
+
+Install Docker, Git, k3d, kubectl, and curl manually for the current user before setup. The project never installs host tools or invokes privileged commands. Every entry-point script checks its own dependencies and reports missing commands before changing cluster state.
+
+Run from the repository root:
 
 ```bash
-sudo bash p3/scripts/install-tools.sh
-# Log out and back in once for Docker group membership.
 export IOT_LOGIN=yanli
 bash p3/scripts/setup.sh
 bash p3/scripts/check.sh
@@ -78,12 +80,11 @@ Each command changes `p3/confs/app/deployment.yaml`, commits and pushes it, requ
 
 ## Bonus - local GitLab-backed Argo CD
 
-The bonus VM mounts the whole repository at `/workspace` and has enough memory for the official GitLab chart:
+The bonus VM mounts the whole repository at `/workspace`. Vagrant does not install any tools inside it. Install Docker, Git, Helm, jq, k3d, kubectl, curl, and OpenSSL manually for the VM user before running setup:
 
 ```bash
 cd bonus
 vagrant up --provider=virtualbox
-vagrant reload
 vagrant ssh
 cd /workspace
 bash bonus/scripts/setup.sh
@@ -168,7 +169,7 @@ Expected values:
 
 ```bash
 systemctl is-active k3s
-sudo systemctl status k3s --no-pager
+systemctl status k3s --no-pager
 kubectl get nodes -o wide
 bash /vagrant/scripts/check.sh
 ```
@@ -177,7 +178,7 @@ bash /vagrant/scripts/check.sh
 
 ```bash
 systemctl is-active k3s-agent
-sudo systemctl status k3s-agent --no-pager
+systemctl status k3s-agent --no-pager
 ```
 
 The worker intentionally has no administrator kubeconfig. Run `kubectl get nodes -o wide` on `yanliS`; both nodes must be `Ready` with internal IPs `.110` and `.111`.
@@ -261,15 +262,9 @@ vagrant ssh yanliS -c 'bash /vagrant/scripts/check.sh'
 
 ### Part 3 — CLI installation and configuration
 
-Run Part 3 inside the 42 Linux VM from the repository root, not on the evaluator's host OS.
+Run Part 3 from the repository root in the Linux evaluation environment.
 
-Install the required tools once:
-
-```bash
-sudo bash p3/scripts/install-tools.sh
-```
-
-Log out and back in so the current user receives Docker group membership, then inspect every installed CLI:
+Install all required tools manually for the current user. The setup scripts never invoke a package manager or install missing dependencies. Inspect the available CLIs before setup:
 
 ```bash
 docker --version
@@ -438,7 +433,6 @@ export IOT_LOGIN=yanli
 sed -n '1,220p' Vagrantfile
 vagrant validate
 vagrant up --provider=virtualbox
-vagrant reload yanliB
 vagrant status
 vagrant ssh yanliB
 ```
@@ -449,7 +443,6 @@ Run the remaining commands inside `yanliB`:
 cd /workspace
 nproc
 free -h
-swapon --show
 df -h /
 bash bonus/scripts/setup.sh
 bash bonus/scripts/check.sh
@@ -457,9 +450,9 @@ bash bonus/scripts/check.sh
 
 The first GitLab boot can take 20–30 minutes. Success is the final `Bonus ready` line. Temporary HTTP 503 responses during initialization are expected.
 
-The VM defaults are designed for a 16 GB evaluation host:
+The VM defaults are designed for a resource-constrained evaluation host:
 
-- 8 GB VM RAM and 4 GB guest swap;
+- configurable VM RAM and disk, with no automatic swap or package installation;
 - 6 virtual CPUs with I/O APIC enabled so all CPUs are visible;
 - sparse 50 GB virtual disk;
 - one GitLab webservice and one Sidekiq replica;
@@ -598,10 +591,10 @@ VBoxManage list runningvms
 ### K3s services
 
 ```bash
-sudo systemctl status k3s --no-pager
-sudo journalctl -u k3s -n 100 --no-pager
-sudo systemctl status k3s-agent --no-pager
-sudo journalctl -u k3s-agent -n 100 --no-pager
+systemctl status k3s --no-pager
+journalctl -u k3s -n 100 --no-pager
+systemctl status k3s-agent --no-pager
+journalctl -u k3s-agent -n 100 --no-pager
 ```
 
 ### Kubernetes
