@@ -3,8 +3,8 @@ set -Eeux -o pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 readonly ROOT_DIR
-# shellcheck source=../../scripts/lib/requirements.sh
-source "${ROOT_DIR}/scripts/lib/requirements.sh"
+# shellcheck source=requirements.sh
+source "${ROOT_DIR}/p3/scripts/requirements.sh"
 require_commands base64 kubectl
 
 password="$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 --decode)"

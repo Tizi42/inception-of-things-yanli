@@ -4,8 +4,8 @@ set -Eeuo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 readonly ROOT_DIR
 readonly STATE_FILE="${ROOT_DIR}/bonus/.state/runtime.env"
-# shellcheck source=../../scripts/lib/requirements.sh
-source "${ROOT_DIR}/scripts/lib/requirements.sh"
+# shellcheck source=requirements.sh
+source "${ROOT_DIR}/bonus/scripts/requirements.sh"
 require_commands curl grep kubectl
 
 if [[ ! -f "${STATE_FILE}" ]]; then

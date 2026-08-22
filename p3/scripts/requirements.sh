@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Shared, side-effect-free prerequisite checks for host-side scripts.
+# Shared, side-effect-free prerequisite checks for Part 3 scripts.
 
 require_commands() {
   local command_name

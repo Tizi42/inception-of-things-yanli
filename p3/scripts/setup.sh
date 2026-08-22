@@ -8,8 +8,8 @@ readonly LOGIN="${IOT_LOGIN:-yanli}"
 readonly REPO_URL="https://github.com/Tizi42/inception-of-things-yanli"
 readonly REVISION="${IOT_GIT_REVISION:-main}"
 readonly APP_TEMPLATE="${ROOT_DIR}/p3/confs/argocd-application.yaml.tmpl"
-# shellcheck source=../../scripts/lib/requirements.sh
-source "${ROOT_DIR}/scripts/lib/requirements.sh"
+# shellcheck source=requirements.sh
+source "${ROOT_DIR}/p3/scripts/requirements.sh"
 
 require_commands awk curl docker git grep k3d kubectl sed timeout
 require_docker_access

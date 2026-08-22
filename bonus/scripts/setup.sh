@@ -8,8 +8,8 @@ readonly EXTERNAL_IP="${IOT_BONUS_IP:-192.168.56.120}"
 readonly DOMAIN="${IOT_GITLAB_DOMAIN:-${EXTERNAL_IP}.nip.io}"
 readonly GITLAB_CHART_VERSION="${IOT_GITLAB_CHART_VERSION:-9.11.12}"
 readonly VALUES_TEMPLATE="${ROOT_DIR}/bonus/confs/gitlab-values.yaml.tmpl"
-# shellcheck source=../../scripts/lib/requirements.sh
-source "${ROOT_DIR}/scripts/lib/requirements.sh"
+# shellcheck source=requirements.sh
+source "${ROOT_DIR}/bonus/scripts/requirements.sh"
 
 require_commands awk base64 curl docker git grep helm jq k3d kubectl openssl sed timeout
 require_docker_access

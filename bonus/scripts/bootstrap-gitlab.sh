@@ -11,8 +11,8 @@ readonly PROJECT_NAME="inception-of-things-${LOGIN}"
 readonly PROJECT_PATH="root%2F${PROJECT_NAME}"
 readonly STATE_DIR="${ROOT_DIR}/bonus/.state"
 readonly STATE_FILE="${STATE_DIR}/runtime.env"
-# shellcheck source=../../scripts/lib/requirements.sh
-source "${ROOT_DIR}/scripts/lib/requirements.sh"
+# shellcheck source=requirements.sh
+source "${ROOT_DIR}/bonus/scripts/requirements.sh"
 
 require_commands base64 curl git jq kubectl openssl sed timeout
 
