@@ -30,8 +30,13 @@ Vagrant.configure("2") do |config|
       vb.name = "#{LOGIN}S"
       vb.gui = false
       vb.linked_clone = true
-      vb.cpus = Integer(ENV.fetch("IOT_SERVER_CPUS", "2"))
-      vb.memory = Integer(ENV.fetch("IOT_SERVER_MEMORY", "2048"))
+      vb.cpus = Integer(ENV.fetch("IOT_SERVER_CPUS", "1"))
+      vb.memory = Integer(ENV.fetch("IOT_SERVER_MEMORY", "1024"))
+      vb.customize ["modifyvm", :id, "--x86-x2apic", "off"]
+      vb.customize ["modifyvm", :id, "--nested-paging", "on"]
+      vb.customize ["modifyvm", :id, "--paravirt-provider", "kvm"]
+      vb.customize ["modifyvm", :id, "--iommu", "none"]
+      vb.customize ["modifyvm", :id, "--accelerate-3d", "off"]
     end
 
     server.vm.provision "shell",
@@ -48,7 +53,12 @@ Vagrant.configure("2") do |config|
       vb.gui = false
       vb.linked_clone = true
       vb.cpus = Integer(ENV.fetch("IOT_WORKER_CPUS", "1"))
-      vb.memory = Integer(ENV.fetch("IOT_WORKER_MEMORY", "1024"))
+      vb.memory = Integer(ENV.fetch("IOT_WORKER_MEMORY", "512"))
+      vb.customize ["modifyvm", :id, "--x86-x2apic", "off"]
+      vb.customize ["modifyvm", :id, "--nested-paging", "on"]
+      vb.customize ["modifyvm", :id, "--paravirt-provider", "kvm"]
+      vb.customize ["modifyvm", :id, "--iommu", "none"]
+      vb.customize ["modifyvm", :id, "--accelerate-3d", "off"]
     end
 
     worker.vm.provision "shell",
