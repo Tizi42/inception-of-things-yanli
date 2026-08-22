@@ -19,7 +19,7 @@ require_commands() {
   for command_name in "${missing_commands[@]}"; do
     printf "ERROR: required tool '%s' was not found in PATH.\n" "${command_name}" >&2
   done
-  echo "Install the missing tool(s) locally, make them available in PATH, and rerun this script." >&2
+  echo "Inside the bonus VM, run bonus/scripts/install-tools.sh, then rerun this script." >&2
   echo "No installation was attempted." >&2
   return 127
 }

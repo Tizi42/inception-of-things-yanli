@@ -95,13 +95,16 @@ Each command changes `p3/confs/app/deployment.yaml`, commits and pushes it, requ
 
 ## Bonus - local GitLab-backed Argo CD
 
-The bonus VM mounts the whole repository at `/workspace`. Vagrant does not install any tools inside it. Install Docker, Git, Helm, jq, k3d, kubectl, curl, and OpenSSL manually for the VM user before running setup:
+The bonus VM mounts the whole repository at `/workspace`. Vagrant does not install any tools automatically. Run the VM-only installer explicitly; it uses `sudo` to install Docker, Git, Helm, jq, k3d, kubectl, curl, OpenSSL, and their supporting packages:
 
 ```bash
 cd bonus
 vagrant up --provider=virtualbox
 vagrant ssh
 cd /workspace
+bash bonus/scripts/install-tools.sh
+# Run this only if the installer says the Docker group is not active yet:
+newgrp docker
 bash bonus/scripts/setup.sh
 bash bonus/scripts/check.sh
 ```
@@ -457,6 +460,9 @@ cd /workspace
 nproc
 free -h
 df -h /
+bash bonus/scripts/install-tools.sh
+# Run this only if requested by the installer:
+newgrp docker
 bash bonus/scripts/setup.sh
 bash bonus/scripts/check.sh
 ```
